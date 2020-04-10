@@ -1,8 +1,10 @@
 import React from 'react';
+import Geolocation from '@react-native-community/geolocation';
 import logo from './logo.svg';
 import './App.css';
 
 function App() {
+  Geolocation.getCurrentPosition(info => console.log(info));
   return (
     <div className="App">
       <header className="App-header">
@@ -23,4 +25,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 
