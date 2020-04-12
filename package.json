@@ -4,7 +4,10 @@
   "private": true,
   "dependencies": {
     "@react-native-community/geolocation": "^2.0.2",
-    "babel-loader": "^8.1.0"
+    "babel-loader": "^8.1.0",
+    "react": "^16.11.0",
+    "react-native": "^0.62.2",
+    "webpack": "^4.42.1"
   },
   "scripts": {
     "start": "react-scripts start",
