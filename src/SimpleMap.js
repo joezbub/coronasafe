@@ -43,24 +43,44 @@
 
 import React, { Component } from 'react';
 import GoogleMapReact from 'google-map-react';
+import $ from "jquery";
 import Geolocation from '@react-native-community/geolocation';
+import { geolocated } from "react-geolocated";
 import MyGreatPlace from './MyGreatPlace.js';
 
-const AnyReactComponent = ({ text }) => <div>{text}</div>;
+
+// const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
 function sendCoords(coords, url) {
-	console.log(url);
-	var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("POST", url);
-	xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+  var xmlhttp = new XMLHttpRequest();
+  // $.ajax({
+  //   type : "GET", 
+  //   url : "https://rawpythontest.r2dev2bb8.repl.co/", 
+  //   beforeSend: function(xhr){xhr.setRequestHeader("Coords", coords.latitude.toString() + ' ' + coords.longitude.toString())},
+  //   success : function(result) { 
+  //       console.log(result.responseText);
+  //   }, 
+  //   error : function(result) { 
+  //     console.log(result.responseText);
+  //   } 
+  // }); 
+  
+  xmlhttp.open("POST", url);  
+  xmlhttp.setRequestHeader("coords", coords.latitude.toString() + ' ' + coords.longitude.toString());
   xmlhttp.send(coords.latitude.toString() + ' ' + coords.longitude.toString());
-  if (xmlhttp.readyState === 4) {
-    if (xmlhttp.status === 200) {
-      console.log(xmlhttp.responseText);
-    }
-  }
-	console.log("sent");
+  console.log(xmlhttp.responseText);
+	console.log("sent: " + coords.latitude.toString() + ' ' + coords.longitude.toString());
 }
+
+function getCoords(coords, url) {
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open("GET", url);  
+  xmlhttp.setRequestHeader("coords", coords.latitude.toString() + ' ' + coords.longitude.toString());
+  xmlhttp.send(coords.latitude.toString() + ' ' + coords.longitude.toString());
+  console.log("get: "  + coords);
+  return xmlhttp.responseText;
+}
+// xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
 
 class SimpleMap extends Component {
   // double latitude;
@@ -70,7 +90,10 @@ class SimpleMap extends Component {
   // }
   constructor(props) {
     super(props);
-    this.state = {longitude: 0.0, latitude: 0.0};
+    this.state = {latitude: 0.0, longitude: 0.0};
+  
+
+    
   }
   static defaultProps = {
     center: {
@@ -79,23 +102,33 @@ class SimpleMap extends Component {
     },
     zoom: 11
   };
-  
   render() {
-      Geolocation.watchPosition(
-        position => {
-          this.setState({latitude: position.coords.latitude, longitude: position.coords.longitude});
-          sendCoords(this.state, "https://RawPythonTest.r2dev2bb8.repl.co");
-        });
-    console.log(this.state.longitude);
-    return (
+    // Geolocation.getCurrentPosition(
+    //   position => {
+    //     this.setState({latitude: position.coords.latitude, longitude: position.coords.longitude});
+    //     sendCoords(this.state, "https://RawPythonTest.r2dev2bb8.repl.co");
+    //   })
+    // this.setState({latitude: this.props.latitude, longitude: this.props.longitude});
+    if (this.props.coords)  {
+      sendCoords(this.props.coords, "https://RawPythonTest.r2dev2bb8.repl.co");
+      console.log(getCoords(this.props.coords, "https://RawPythonTest.r2dev2bb8.repl.co"));
+    }
+  
+
+    return !this.props.isGeolocationAvailable ? (
+      <div>Your browser does not support Geolocation</div>
+  ) : !this.props.isGeolocationEnabled ? (
+      <div>Geolocation is not enabled</div>
+  ) : this.props.coords ? (
+      
       // Important! Always set the container height explicitly
       <div style={{ height: '100vh', width: '100%' }}>
         <GoogleMapReact
           bootstrapURLKeys={{key: "AIzaSyDTz5KwujIjzE6RRCnaJ5ZoZSroy4vdz-0"}}
-          defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
+          defaultCenter={{lat: this.props.coords.latitude, lng: this.props.coords.longitude}}
           defaultZoom={16}
         >
-          <MyGreatPlace lat={this.state.latitude} lng={this.state.longitude} /* Kreyser Avrora */ />
+          <MyGreatPlace lat={this.props.coords.latitude} lng={this.props.coords.longitude} /* Kreyser Avrora */ />
           {/* <AnyReactComponent
             lat={this.state.latitude}
             lng={this.state.longitude}
@@ -103,8 +136,14 @@ class SimpleMap extends Component {
           />  */}
         </GoogleMapReact>
       </div>
+      ) : (
+        <div>Getting the location data&hellip; </div>
     );
   }
 }
- 
-export default SimpleMap;
+export default geolocated({
+  positionOptions: {
+      enableHighAccuracy: false,
+  },
+  userDecisionTimeout: 5000,
+})(SimpleMap);
