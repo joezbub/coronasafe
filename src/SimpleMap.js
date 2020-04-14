@@ -72,12 +72,25 @@ function sendCoords(coords, url) {
 	console.log("sent: " + coords.latitude.toString() + ' ' + coords.longitude.toString());
 }
 
+function parseCoords(coords) {
+  latlon = coords.slice(1, -1).split(', ');
+  lat = parseFloat(latlon[0]);
+  lon = parseFloat(latlon[1]);
+  return {
+    "latitude": lat,
+    "longitude": lon
+  };
+}
+
 function getCoords(coords, url) {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", url);  
-  xmlhttp.setRequestHeader("coords", coords.latitude.toString() + ' ' + coords.longitude.toString());
+  xmlhttp.setRequestHeader("Coords", coords.latitude.toString() + ' ' + coords.longitude.toString());
   xmlhttp.send(coords.latitude.toString() + ' ' + coords.longitude.toString());
-  console.log("get: "  + coords);
+  newcoords = xmlhttp.split('\n')
+  for (var i=0; i<newcoords.length; i++) {
+    newcoords[i] = parseCoords(newcoords[i]);
+  }
   return xmlhttp.responseText;
 }
 // xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
